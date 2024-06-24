@@ -143,8 +143,8 @@
 								"datasetParameters": {
 									"NYCPayrollData2021": {},
 									"NYCPayrollData2020": {},
-									"sinkPayrollSummary": {},
-									"sinkNYCPayrollSummarycsv": {}
+									"sinkNYCPayrollSummarycsv": {},
+									"NYCPayrollSummarytoFile": {}
 								}
 							},
 							"staging": {},

@@ -844,18 +844,14 @@
 					],
 					"sinks": [
 						{
-							"dataset": {
-								"referenceName": "NYC_Payroll_Summary",
-								"type": "DatasetReference"
-							},
-							"name": "sinkPayrollSummary"
+							"name": "sinkNYCPayrollSummarycsv"
 						},
 						{
-							"dataset": {
-								"referenceName": "NYC_Payroll_Summary_csv",
-								"type": "DatasetReference"
+							"linkedService": {
+								"referenceName": "AzureDataLakeStorage",
+								"type": "LinkedServiceReference"
 							},
-							"name": "sinkNYCPayrollSummarycsv"
+							"name": "NYCPayrollSummarytoFile"
 						}
 					],
 					"transformations": [
@@ -960,41 +956,32 @@
 						"     TotalPaid = sum(TotalPaid)) ~> aggregateTotalPaid",
 						"aggregateTotalPaid sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          FiscalYear as integer,",
-						"          AgencyName as string,",
-						"          TotalPaid as double",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     truncate:true,",
-						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary",
+						"     preCommands: [],",
+						"     postCommands: []) ~> sinkNYCPayrollSummarycsv",
 						"aggregateTotalPaid sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          FiscalYear as string,",
-						"          AgencyName as string,",
-						"          TotalPaid as string",
-						"     ),",
+						"     format: 'delimited',",
+						"     fileSystem: 'dirstaging',",
 						"     truncate: true,",
+						"     columnDelimiter: ',',",
+						"     escapeChar: '\\\\',",
+						"     quoteChar: '\\\"',",
+						"     columnNamesAsHeader: false,",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> sinkNYCPayrollSummarycsv"
+						"     skipDuplicateMapOutputs: true,",
+						"     saveOrder: 1) ~> NYCPayrollSummarytoFile"
 					]
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2021')]",
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2020')]",
-				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary')]",
-				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary_csv')]"
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
 			]
 		},
 		{
