@@ -1,0 +1,9 @@
+{
+	"name": "udacityfactorylucasp",
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d4e9ad67-8f3d-42b0-be9e-6b222dfe1b16",
+		"tenantId": "f958e84a-92b8-439f-a62d-4f45996b6d07"
+	}
+}
