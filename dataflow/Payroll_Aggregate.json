@@ -26,6 +26,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "sinkPayrollSummary"
+				},
+				{
+					"dataset": {
+						"referenceName": "NYC_Payroll_Summary_csv",
+						"type": "DatasetReference"
+					},
+					"name": "sinkNYCPayrollSummarycsv"
 				}
 			],
 			"transformations": [
@@ -143,7 +150,20 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary"
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary",
+				"aggregateTotalPaid sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          FiscalYear as string,",
+				"          AgencyName as string,",
+				"          TotalPaid as string",
+				"     ),",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkNYCPayrollSummarycsv"
 			]
 		}
 	}
