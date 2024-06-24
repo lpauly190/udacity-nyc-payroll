@@ -844,12 +844,16 @@
 					],
 					"sinks": [
 						{
-							"name": "sinkNYCPayrollSummarycsv"
-						},
-						{
 							"linkedService": {
 								"referenceName": "AzureDataLakeStorage",
 								"type": "LinkedServiceReference"
+							},
+							"name": "sinkNYCPayrollSummarycsv"
+						},
+						{
+							"dataset": {
+								"referenceName": "NYC_Payroll_Summary",
+								"type": "DatasetReference"
 							},
 							"name": "NYCPayrollSummarytoFile"
 						}
@@ -956,12 +960,6 @@
 						"     TotalPaid = sum(TotalPaid)) ~> aggregateTotalPaid",
 						"aggregateTotalPaid sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     preCommands: [],",
-						"     postCommands: []) ~> sinkNYCPayrollSummarycsv",
-						"aggregateTotalPaid sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
 						"     format: 'delimited',",
 						"     fileSystem: 'dirstaging',",
 						"     truncate: true,",
@@ -973,15 +971,34 @@
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkNYCPayrollSummarycsv",
+						"aggregateTotalPaid sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          FiscalYear as integer,",
+						"          AgencyName as string,",
+						"          TotalPaid as double",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     saveOrder: 1) ~> NYCPayrollSummarytoFile"
+						"     saveOrder: 1,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     preCommands: [],",
+						"     postCommands: []) ~> NYCPayrollSummarytoFile"
 					]
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2021')]",
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2020')]",
-				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]",
+				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary')]"
 			]
 		},
 		{
