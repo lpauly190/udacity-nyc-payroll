@@ -1031,7 +1031,7 @@
 						"          AgencyName as string,",
 						"          TotalPaid as string",
 						"     ),",
-						"     partitionFileNames:['data-nyc-payroll'],",
+						"     partitionFileNames:['data-nyc-payroll.csv'],",
 						"     truncate: true,",
 						"     umask: 0022,",
 						"     preCommands: [],",
