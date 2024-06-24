@@ -26,9 +26,6 @@
 						"type": "DatasetReference"
 					},
 					"name": "sinkPayrollSummary"
-				},
-				{
-					"name": "sinktoStg"
 				}
 			],
 			"transformations": [
@@ -146,11 +143,7 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary",
-				"aggregateTotalPaid sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sinktoStg"
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary"
 			]
 		}
 	}
