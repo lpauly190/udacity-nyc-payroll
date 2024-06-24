@@ -21,9 +21,9 @@
 			],
 			"sinks": [
 				{
-					"linkedService": {
-						"referenceName": "AzureDataLakeStorage",
-						"type": "LinkedServiceReference"
+					"dataset": {
+						"referenceName": "Summary",
+						"type": "DatasetReference"
 					},
 					"name": "sinkNYCPayrollSummarycsv"
 				},
@@ -137,13 +137,12 @@
 				"     TotalPaid = sum(TotalPaid)) ~> aggregateTotalPaid",
 				"aggregateTotalPaid sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     format: 'delimited',",
-				"     fileSystem: 'dirstaging',",
+				"     input(",
+				"          FiscalYear as string,",
+				"          AgencyName as string,",
+				"          TotalPaid as string",
+				"     ),",
 				"     truncate: true,",
-				"     columnDelimiter: ',',",
-				"     escapeChar: '\\\\',",
-				"     quoteChar: '\\\"',",
-				"     columnNamesAsHeader: false,",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
