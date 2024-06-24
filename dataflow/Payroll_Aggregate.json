@@ -22,17 +22,17 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "NYC_Payroll_Summary",
-						"type": "DatasetReference"
-					},
-					"name": "sinkPayrollSummary"
-				},
-				{
-					"dataset": {
 						"referenceName": "NYC_Payroll_Summary_csv",
 						"type": "DatasetReference"
 					},
 					"name": "sinkNYCPayrollSummarycsv"
+				},
+				{
+					"linkedService": {
+						"referenceName": "AzureDataLakeStorage",
+						"type": "LinkedServiceReference"
+					},
+					"name": "NYCPayrollSummarytoFile"
 				}
 			],
 			"transformations": [
@@ -138,22 +138,6 @@
 				"aggregateTotalPaid sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
-				"          FiscalYear as integer,",
-				"          AgencyName as string,",
-				"          TotalPaid as double",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     truncate:true,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary",
-				"aggregateTotalPaid sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
 				"          FiscalYear as string,",
 				"          AgencyName as string,",
 				"          TotalPaid as string",
@@ -163,7 +147,22 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sinkNYCPayrollSummarycsv"
+				"     skipDuplicateMapOutputs: true) ~> sinkNYCPayrollSummarycsv",
+				"aggregateTotalPaid sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'dirstaging',",
+				"     truncate: true,",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1) ~> NYCPayrollSummarytoFile"
 			]
 		}
 	}
