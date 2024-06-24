@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Sichere Zeichenfolge für \"accountKey\" von \"AzureDataLakeStorage\""
 		},
+		"AzureDataLakeStorageSynapse_accountKey": {
+			"type": "secureString",
+			"metadata": "Sichere Zeichenfolge für \"accountKey\" von \"AzureDataLakeStorageSynapse\""
+		},
 		"AzureSqlDatabase1_connectionString": {
 			"type": "secureString",
 			"metadata": "Sichere Zeichenfolge für \"connectionString\" von \"AzureSqlDatabase1\""
@@ -18,6 +22,10 @@
 		"AzureDataLakeStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adlsnycpayrolllucaspy.dfs.core.windows.net/"
+		},
+		"AzureDataLakeStorageSynapse_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://synapseworklucasp.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -742,6 +750,47 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Summary')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorageSynapse",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "NYC_Payroll_Summary.csv",
+						"fileSystem": "fssynapseworklucasp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "FiscalYear",
+						"type": "String"
+					},
+					{
+						"name": "AgencyName",
+						"type": "String"
+					},
+					{
+						"name": "TotalPaid",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorageSynapse')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/TitleMaster')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1006,6 +1055,23 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorageSynapse')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorageSynapse_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorageSynapse_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -1100,9 +1166,9 @@
 					],
 					"sinks": [
 						{
-							"linkedService": {
-								"referenceName": "AzureDataLakeStorage",
-								"type": "LinkedServiceReference"
+							"dataset": {
+								"referenceName": "Summary",
+								"type": "DatasetReference"
 							},
 							"name": "sinkNYCPayrollSummarycsv"
 						},
@@ -1216,13 +1282,12 @@
 						"     TotalPaid = sum(TotalPaid)) ~> aggregateTotalPaid",
 						"aggregateTotalPaid sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     format: 'delimited',",
-						"     fileSystem: 'dirstaging',",
+						"     input(",
+						"          FiscalYear as string,",
+						"          AgencyName as string,",
+						"          TotalPaid as string",
+						"     ),",
 						"     truncate: true,",
-						"     columnDelimiter: ',',",
-						"     escapeChar: '\\\\',",
-						"     quoteChar: '\\\"',",
-						"     columnNamesAsHeader: false,",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -1253,7 +1318,7 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2021')]",
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2020')]",
-				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]",
+				"[concat(variables('factoryId'), '/datasets/Summary')]",
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary')]"
 			]
 		},

@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Sichere Zeichenfolge für \"accountKey\" von \"AzureDataLakeStorage\""
 		},
+		"AzureDataLakeStorageSynapse_accountKey": {
+			"type": "secureString",
+			"metadata": "Sichere Zeichenfolge für \"accountKey\" von \"AzureDataLakeStorageSynapse\""
+		},
 		"AzureSqlDatabase1_connectionString": {
 			"type": "secureString",
 			"metadata": "Sichere Zeichenfolge für \"connectionString\" von \"AzureSqlDatabase1\""
@@ -18,6 +22,10 @@
 		"AzureDataLakeStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adlsnycpayrolllucaspy.dfs.core.windows.net/"
+		},
+		"AzureDataLakeStorageSynapse_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://synapseworklucasp.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -49,11 +57,17 @@
 					"AzureDataLakeStorage_accountKey": {
 						"value": "[parameters('AzureDataLakeStorage_accountKey')]"
 					},
+					"AzureDataLakeStorageSynapse_accountKey": {
+						"value": "[parameters('AzureDataLakeStorageSynapse_accountKey')]"
+					},
 					"AzureSqlDatabase1_connectionString": {
 						"value": "[parameters('AzureSqlDatabase1_connectionString')]"
 					},
 					"AzureDataLakeStorage_properties_typeProperties_url": {
 						"value": "[parameters('AzureDataLakeStorage_properties_typeProperties_url')]"
+					},
+					"AzureDataLakeStorageSynapse_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorageSynapse_properties_typeProperties_url')]"
 					}
 				}
 			},

@@ -8,11 +8,17 @@
 		"AzureDataLakeStorage_accountKey": {
 			"value": ""
 		},
+		"AzureDataLakeStorageSynapse_accountKey": {
+			"value": ""
+		},
 		"AzureSqlDatabase1_connectionString": {
 			"value": ""
 		},
 		"AzureDataLakeStorage_properties_typeProperties_url": {
 			"value": "https://adlsnycpayrolllucaspy.dfs.core.windows.net/"
+		},
+		"AzureDataLakeStorageSynapse_properties_typeProperties_url": {
+			"value": "https://synapseworklucasp.dfs.core.windows.net/"
 		}
 	}
 }
