@@ -445,6 +445,47 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/NYC_Payroll_Summary_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "NYC_Payroll_Summary.csv",
+						"fileSystem": "dirstaging"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "FiscalYear",
+						"type": "String"
+					},
+					{
+						"name": "AgencyName",
+						"type": "String"
+					},
+					{
+						"name": "TotalPaid",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/NYC_Payroll_TITLE_MD')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -808,6 +849,13 @@
 								"type": "DatasetReference"
 							},
 							"name": "sinkPayrollSummary"
+						},
+						{
+							"dataset": {
+								"referenceName": "NYC_Payroll_Summary_csv",
+								"type": "DatasetReference"
+							},
+							"name": "sinkNYCPayrollSummarycsv"
 						}
 					],
 					"transformations": [
@@ -925,14 +973,28 @@
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary"
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary",
+						"aggregateTotalPaid sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          FiscalYear as string,",
+						"          AgencyName as string,",
+						"          TotalPaid as string",
+						"     ),",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkNYCPayrollSummarycsv"
 					]
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2021')]",
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2020')]",
-				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary')]"
+				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary')]",
+				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary_csv')]"
 			]
 		},
 		{
@@ -1231,261 +1293,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/TitleMaster')]",
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_TITLE_MD')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/nycpayrollpipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "AGENCY",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Payroll_AGENCY_MD",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"AgencyMaster": {},
-									"NYCPayrollAGENCYMD": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
-						"name": "EMP",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Payroll_EMP_MD",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"EmpMaster": {},
-									"NYCPayrollEMPMD": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
-						"name": "TITLE",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Payroll_TITLE_MD",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"TitleMaster": {},
-									"NYCPayrollTITLEMD": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
-						"name": "AGGREGATE",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [
-							{
-								"activity": "payroll2020",
-								"dependencyConditions": [
-									"Completed"
-								]
-							},
-							{
-								"activity": "payroll2021",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Payroll_Aggregate",
-								"type": "DataFlowReference",
-								"parameters": {
-									"dataflow_param_fiscalyear": "2020"
-								},
-								"datasetParameters": {
-									"NYCPayrollData2021": {},
-									"NYCPayrollData2020": {},
-									"sinkPayrollSummary": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
-						"name": "payroll2020",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [
-							{
-								"activity": "AGENCY",
-								"dependencyConditions": [
-									"Completed"
-								]
-							},
-							{
-								"activity": "EMP",
-								"dependencyConditions": [
-									"Completed"
-								]
-							},
-							{
-								"activity": "TITLE",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Payroll_Data_2020",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"nycpayroll2020": {},
-									"NYCPayrollData2020": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
-						"name": "payroll2021",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [
-							{
-								"activity": "AGENCY",
-								"dependencyConditions": [
-									"Completed"
-								]
-							},
-							{
-								"activity": "EMP",
-								"dependencyConditions": [
-									"Completed"
-								]
-							},
-							{
-								"activity": "TITLE",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Payroll_Data_2021",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"nycpayroll2021": {},
-									"NYCPayrollData2021": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/Payroll_AGENCY_MD')]",
-				"[concat(variables('factoryId'), '/dataflows/Payroll_EMP_MD')]",
-				"[concat(variables('factoryId'), '/dataflows/Payroll_TITLE_MD')]",
-				"[concat(variables('factoryId'), '/dataflows/Payroll_Aggregate')]",
-				"[concat(variables('factoryId'), '/dataflows/Payroll_Data_2020')]",
-				"[concat(variables('factoryId'), '/dataflows/Payroll_Data_2021')]"
 			]
 		}
 	]

@@ -155,7 +155,8 @@
 								"datasetParameters": {
 									"NYCPayrollData2021": {},
 									"NYCPayrollData2020": {},
-									"sinkPayrollSummary": {}
+									"sinkPayrollSummary": {},
+									"sinkNYCPayrollSummarycsv": {}
 								}
 							},
 							"staging": {},
@@ -670,6 +671,47 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/NYC_Payroll_Summary_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "NYC_Payroll_Summary.csv",
+						"fileSystem": "dirstaging"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "FiscalYear",
+						"type": "String"
+					},
+					{
+						"name": "AgencyName",
+						"type": "String"
+					},
+					{
+						"name": "TotalPaid",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/NYC_Payroll_TITLE_MD')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1063,6 +1105,13 @@
 								"type": "DatasetReference"
 							},
 							"name": "sinkPayrollSummary"
+						},
+						{
+							"dataset": {
+								"referenceName": "NYC_Payroll_Summary_csv",
+								"type": "DatasetReference"
+							},
+							"name": "sinkNYCPayrollSummarycsv"
 						}
 					],
 					"transformations": [
@@ -1180,14 +1229,28 @@
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary"
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkPayrollSummary",
+						"aggregateTotalPaid sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          FiscalYear as string,",
+						"          AgencyName as string,",
+						"          TotalPaid as string",
+						"     ),",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkNYCPayrollSummarycsv"
 					]
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2021')]",
 				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Data_2020')]",
-				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary')]"
+				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary')]",
+				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Summary_csv')]"
 			]
 		},
 		{
