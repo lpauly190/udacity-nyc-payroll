@@ -1,5 +1,11 @@
 {
 	"name": "udacityfactorylucasp",
+	"properties": {
+		"globalConfigurations": {
+			"factoryStagingLSReferenceName": "AzureDataLakeStorage",
+			"factoryStagingLSType": "LinkedServiceReference"
+		}
+	},
 	"location": "northeurope",
 	"identity": {
 		"type": "SystemAssigned",
