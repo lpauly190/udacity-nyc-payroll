@@ -28,9 +28,9 @@
 					"name": "sinkNYCPayrollSummarycsv"
 				},
 				{
-					"linkedService": {
-						"referenceName": "AzureDataLakeStorage",
-						"type": "LinkedServiceReference"
+					"dataset": {
+						"referenceName": "NYC_Payroll_Summary",
+						"type": "DatasetReference"
 					},
 					"name": "NYCPayrollSummarytoFile"
 				}
@@ -151,19 +151,23 @@
 				"     skipDuplicateMapOutputs: true) ~> sinkNYCPayrollSummarycsv",
 				"aggregateTotalPaid sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     format: 'delimited',",
-				"     fileSystem: 'dirstaging',",
-				"     truncate: true,",
-				"     columnDelimiter: ',',",
-				"     escapeChar: '\\\\',",
-				"     quoteChar: '\\\"',",
-				"     columnNamesAsHeader: false,",
-				"     umask: 0022,",
-				"     preCommands: [],",
-				"     postCommands: [],",
+				"     input(",
+				"          FiscalYear as integer,",
+				"          AgencyName as string,",
+				"          TotalPaid as double",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     saveOrder: 1) ~> NYCPayrollSummarytoFile"
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     preCommands: [],",
+				"     postCommands: []) ~> NYCPayrollSummarytoFile"
 			]
 		}
 	}
